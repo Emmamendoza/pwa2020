@@ -18,7 +18,8 @@ module.exports = {
             description: req.body.description,
             price: req.body.price,
             quantity: req.body.quantity,
-            category: req.body.category
+            category: req.body.category,
+            tags:req.body.tags
         })
         product.save();
         res.json(product);

@@ -1,5 +1,14 @@
 const mongoose = require("../bin/mongoDB");
 
+const noticiasRelSchema = new mongoose.Schema({
+    titulo:{
+        type:String
+    },
+    descripcion:{
+        type:String
+    }
+});
+
 const newsSchema = new mongoose.Schema({
     titulo: {
         type: String,
@@ -22,7 +31,8 @@ const newsSchema = new mongoose.Schema({
     update: { 
         type: Date,
         default: Date.now 
-    } 
+    },
+    relacionada: [noticiasRelSchema]
 })
 
 module.exports = mongoose.model("news", newsSchema);

@@ -18,7 +18,8 @@ module.exports = {
             descripcion: req.body.descripcion,
             cantidadVistas: req.body.cantidadVistas,
             categoria: req.body.categoria,
-            update: req.body.update
+            update: req.body.update,
+            relacionada: req.body.relacionada
         }
         news.save((error,document) => {
             if(error){
