@@ -1,37 +1,60 @@
-const productsModel = require("../models/productsModels")
+const productosModel = require("../models/productsModel");
+const categoryModel = require("../models/categoriesModel")
 module.exports = {
     getAll: async (req, res, next) => {
-      console.log(req.query);
-       const productos = await productsModel.find({});
-      res.json(productos);
+        try {
+            const productos = await productosModel.find({"tags.name":"Celulares"}).populate("category")
+            /*productosModel.find({}, function (err, productos) {
+                res.json(productos)
+            })*/
+            //const productos = await productosModel.find({user:req.body.user,password:req.body.password})
+            res.json(productos)
+        } catch (e) {
+            next(e)
+        }
+
     },
     getById: async (req, res, next) => {
         console.log(req.params.id);
-        const productos = await productsModel.findById(req.params.id);
-        res.json(productos);
+        try {
+            const producto = await productosModel.findById(req.params.id)
+            res.json(producto)
+        } catch (e) {
+            next(e)
+        }
     },
-    create:(req, res, next) => {
+    create: async function (req, res, next) {
         console.log(req.body);
-        const product = new productsModel({
-            name:req.body.name,
-            sku: req.body.sku,
-            description: req.body.description,
-            price: req.body.price,
-            quantity: req.body.quantity,
-            category: req.body.category,
-            tags:req.body.tags
-        })
-        product.save();
-        res.json(product);
+        try {
+            const producto = new productosModel({
+                name: req.body.name,
+                sku: req.body.sku,
+                description: req.body.description,
+                price: req.body.price,
+                quantity: req.body.quantity,
+                category:req.body.category,
+                tags:req.body.tags
+            })
+            const prod = await producto.save();
+            res.json(producto)
+        } catch (e) {
+            next(e)
+        }
     },
-    update: async (req, res, next) => {
-        console.log(req.params.id,req.body);
-        const productos = await productsModel.update({_id: req.params.id}, req.body, {multi: false});
-        res.json(productos);
+    update: async function (req, res, next) {
+        try {
+            let producto = await productosModel.update({ _id: req.params.id }, req.body, { multi: false })
+            res.json(producto)
+        } catch (e) {
+            next(e)
+        }
     },
-    delete: async (req, res, next) => {
-        console.log(req.params.id);
-        const productos = await productsModel.deleteOne({_id: req.params.id});
-        res.json(productos);
+    delete: async function (req, res, next) {
+        try{
+            let producto = await productosModel.deleteOne({ _id: req.params.id })
+            res.json(producto)
+        } catch (e) {
+            next(e)
+        }
     }
 }

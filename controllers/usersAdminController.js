@@ -1,31 +1,38 @@
-const usersAdminModel = require("../models/usersAdminModel");
+const usersModel = require("../models/usersModel");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-    validate: async (req, res, next) => {
-      console.log(req.query);
-      const userAdmin = await usersAdminModel.findOne({user:req.body.user});
-      if(userAdmin){
-          if(bcrypt.compareSync(req.body.password,userAdmin.password)){
-              // User y password es valido,genera token
-              const token = jwt.sign({userId:userAdmin._id},"123");
-              res.json({message: "usuario ok",token:token});
-          }else{
-              res.json({message: "password incorrecto"});
-          }
-      }else{
-        res.json({message: "usuario incorrecto"});
-      }
-    },
-    create:(req, res, next) => {
+    
+    create: async function (req, res, next) {
         console.log(req.body);
-        const userAdmin = new usersAdminModel({
-            name:req.body.name,
-            user:req.body.user,
-            password:req.body.password
-        })
-        userAdmin.save();
-        res.json(userAdmin);
+        try {
+            const user = new usersModel({
+                name: req.body.name,
+                email:req.body.email,
+                password:req.body.password
+            })
+            const usr = await user.save();
+            res.json(usr)
+        } catch (e) {
+            next(e)
+        }
+    },
+    login: async function (req, res, next) {
+        try {
+            const user = await usersModel.findOne({email:req.body.email})
+            if(user){
+                if(bcrypt.compareSync(req.body.password,user.password)){
+                    const token = jwt.sign({userId:user._id},req.app.get("secretKey"));
+                    res.json({token:token})
+                }else{
+                    res.json({error:"El password es incorrecto"})
+                }
+            }else{
+                res.json({error:"el email no esta registrador"})
+            }
+        } catch (e) {
+            next(e)
+        }
     }
 }

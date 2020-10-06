@@ -1,7 +1,12 @@
 const mongoose = require("../bin/mongoDB");
 
 const categorySchema = new mongoose.Schema({
-    name: String
-});
+    name: {
+        type:String,
+        required:[true,"El campo name es obligatorio"],
+        minlength:1,
+        maxlength:100
+    }
+})
 
-module.exports = mongoose.model("categories",categorySchema);
+module.exports = mongoose.model("categories", categorySchema)

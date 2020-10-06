@@ -1,12 +1,11 @@
 var express = require('express');
 var router = express.Router();
-
-var productsController = require("../controllers/productsController");
-
+const productoController = require("../controllers/productsController");
 /* GET users listing. */
-router.get('/', productsController.getAll);
-router.get('/:id', productsController.getById);
-router.post('/', productsController.create);
-router.put('/:id', productsController.update);
-router.delete('/:id', productsController.delete);
+router.get('/',productoController.getAll);
+router.get('/:id', productoController.getById);
+router.post('/',(req,res,next)=>{req.app.validateUser(req,res,next)},  productoController.create);
+router.put('/:id', productoController.update);
+router.delete('/:id', productoController.delete);
+
 module.exports = router;

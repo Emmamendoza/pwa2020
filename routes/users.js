@@ -1,8 +1,9 @@
 var express = require('express');
 var router = express.Router();
-var usersAdminController = require("../controllers/usersAdminController");
+const usersController  = require("../controllers/usersAdminController");
+/* GET users listing. */
 
-/* CREATE users listing. */
-router.post('/', usersAdminController.create);
-router.post('/', usersAdminController.validate);
+router.post('/registro', usersController.create);
+router.post('/login', usersController.login);
+
 module.exports = router;
