@@ -1,33 +1,56 @@
 const mongoose = require("../bin/mongodb");
-const bcrypt = require("bcrypt")
+const bcrypt = require('bcrypt');
+const errorMessage = require("../util/errorMessage")
+const validators = require("../util/validators")
 const userSchema = new mongoose.Schema({
-    name: {
+    name:{
         type:String,
-        required:[true,"El campo name es obligatorio"],
-        minlength:1,
-        maxlength:100
+        required:[true,errorMessage.GENERAL.campo_obligatorio],
+        trim:true
     },
-    email:{
+    user:{
         type:String,
-        required:[true,"El campo name es obligatorio"],
-        unique:true
+        unique:true,
+        required:[true,errorMessage.GENERAL.campo_obligatorio],
+        validate:{
+            validator: async function(v){
+                const document = await this.model("usersAdmin").findOne({user:v})
+                console.log(document)
+                if(document){
+                    return false;
+                }
+                return true;
+            },
+            message:errorMessage.USERSADMIN.userExist
+        }
     },
     password:{
         type:String,
-        required:[true,"El campo name es obligatorio"]
+        required:[true,errorMessage.GENERAL.campo_obligatorio],
+        validate:{
+            validator: async function(v){
+                return validators.isGoodPassword(v);
+            },
+            message:errorMessage.USERSADMIN.passwordIncorrect
+        }
     }
 })
 userSchema.pre("save",function(next){
-    this.password=bcrypt.hashSync(this.password,10)
+    this.password = bcrypt.hashSync(this.password,10);
     next();
 })
-userSchema.path("email").validate(function(value){
-    const emailValidate = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/.test(value);
-    if (!emailValidate) return false;
-},"El email ingresado no es valido")
-userSchema.path("password").validate(function(value){
-    const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,12}/;
-    return regex.test(value);
-},"El password debe contener al menos 1 numero, 1 minuscula, 1 mayuscula y 6 caracteres")
-
-module.exports = mongoose.model("usuarioswebs", userSchema)
+userSchema.statics.validateUser = async function(user,password){
+    const userAdmin = await this.findOne({user:user});
+    if(userAdmin){
+        if(bcrypt.compareSync(password,userAdmin.password)){
+            //User y password ok, generar token
+            
+            return {error:false,message:"usuario ok",userAdmin:userAdmin};
+        }else{
+            return {error:true,message:"password incorrecto"};
+        }
+    }else{
+        return {error:true,message:"usuario incorrecto"};
+    }
+}
+module.exports = mongoose.model("usersAdmin",userSchema);

@@ -1,26 +1,25 @@
-const mongoose = require("../bin/mongoDB");
+const mongoose = require("../bin/mongodb");
+const errorMessage = require("../util/errorMessage")
 const tagsSchema = new mongoose.Schema({
     name:{
-        type:String
+        type:String,
+        required:true
     }
-});
-
+})
 const productsSchema = new mongoose.Schema({
-    name:{
+    name: {
         type: String,
         index: true,
-        minlength: [1,"Se debe colocar al menos un caracter"],
-        maxlength: 255,
+        maxlength: [255,errorMessage.GENERAL.maxlength],
         trim: true,
-        required: [true, "Nombre es obligatorio"]
-    }, 
+        required: [true,errorMessage.GENERAL.campo_obligatorio]
+    },
     sku: {
         type: String,
         unique: true,
-        minlength: 1,
-        maxlength: 255,
+        maxlength: [255,errorMessage.GENERAL.maxlength],
         trim: true,
-        required: true
+        required: [true,errorMessage.GENERAL.campo_obligatorio]
     },
     description: {
         type: String,
@@ -28,7 +27,7 @@ const productsSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["pendiente","en_stock","activo"]
+        enum: ["pendiente", "en_stock", "activo"]
     },
     category: {
         type: mongoose.Schema.ObjectId,
@@ -36,36 +35,29 @@ const productsSchema = new mongoose.Schema({
     },
     price: {
         type: Number,
-        required: true,
-        get: (price_get) => {
-            return price_get * 1.21
+        min: [1,errorMessage.GENERAL.minlength],
+        required: [true,errorMessage.GENERAL.campo_obligatorio],
+        get: function (price_get) {
+            return price_get * 1.21;
         }
     },
     quantity: Number,
     tags:[tagsSchema]
+    
 });
-
-productsSchema.set('toJSON', {getters: true });
-
-module.exports = mongoose.model("products",productsSchema);
-
-
-
-/*
-module.exports = {
-    getAll: async function() {
-        db.pool.execute("select * from productos");
-        .then(data=>console.log(data));
-
-        const result = await db.pool.execute("select * from products");
-        console.log(result);
-        return result;
-    },
-    create: (data) => {
-        db.pool.query(
-            "INSERT INTO products SET denominacion=?, descripcion=?,activa=?, codigo=?, precio=?, precio_oferta=?, categoria_id=?",
-            [data.denominacion,data.descripcion,data.activa,data.codigo,data.precio,data.precio_oferta,data.categoria_id]
-        );
+productsSchema.statics.findBydIdAndValidate = async function(id){
+    const document = await this.findById(id);
+    if(!document){
+        return{
+            error:true,
+            message:"No existe categoria"
+        }
+        
     }
+    return document;
 }
-*/
+productsSchema.virtual("price_currency").get(function () {
+    return "$ " + this.price;
+})
+productsSchema.set('toJSON', { getters: true, virtuals: true });
+module.exports = mongoose.model("products", productsSchema)

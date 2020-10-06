@@ -1,21 +1,16 @@
-const categoriesModel = require("../models/categoriesModel")
+const categoriesModel = require("../models/categoriesModel");
 module.exports = {
     getAll: async (req, res, next) => {
-      console.log(req.query);
-       const categories = await categoriesModel.find({});
-      res.json(categories);
-    },
-    getById: async (req, res, next) => {
-        console.log(req.params.id);
-        const categories = await categoriesModel.findById(req.params.id);
+        console.log(req.query)
+        const categories = await categoriesModel.find({});
         res.json(categories);
     },
-    create:(req, res, next) => {
+    create: function (req, res, next) {
         console.log(req.body);
-        const categories = new categoriesModel({
-            name:req.body.name
+        const category = new categoriesModel({
+            name: req.body.name
         })
-        product.save();
-        res.json(categories);
+        category.save();
+        res.json(category);
     }
 }
