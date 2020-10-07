@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-
-mongoose.connect('mongodb://localhost/pwa20202C', { useNewUrlParser: true }, function (error) {
+var mongoosePaginate = require('mongoose-paginate-v2');
+mongoose.connect('mongodb://'+ process.env.MONGODB_DATABASE + process.env.MONGODB_HOST, { useNewUrlParser: true }, function (error) {
     if (error) {
         throw error;
     } else {
@@ -8,5 +8,10 @@ mongoose.connect('mongodb://localhost/pwa20202C', { useNewUrlParser: true }, fun
     }
 });
 
+mongoosePaginate.paginate.options={
+    limit: 2,
+    lean: false
+}
 
+mongoose.mongoosePaginate = mongoosePaginate;
 module.exports = mongoose; 

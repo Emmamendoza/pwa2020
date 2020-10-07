@@ -4,7 +4,19 @@ module.exports = {
     getAll: async (req, res, next) => {
         try{
             console.log(req.body.tokenData)
-            const productos = await productsModel.find({}).populate("category").sort({name:1});
+
+            let queryFind={};
+            if(req.query.buscar){
+                queryFind={name: {$regex:".*"+ req.query.buscar+"*." ,$options: "i"}}
+            }
+
+            const productos = await productsModel.paginate(queryFind,{
+                sort:{[req.query.sort]: req.query.sortOrder},
+                sort:{name:1},
+                populate:"category",
+                limit:req.query.limit || 1,
+                page:req.query.page || 1 // page=1 o 2  en la url cuando se busca la pagina
+            });
             res.status(200).json(productos);
         }catch(e){
             next(e)
