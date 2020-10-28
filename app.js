@@ -9,11 +9,12 @@ var usersRouter = require('./routes/users');
 var productsRouter = require('./routes/products');
 var categoriesRouter = require('./routes/categories');
 const jwt = require('jsonwebtoken');
+require('dotenv').config() //Incluir para el env
 
-require('dotenv').config() // Incluir para el .env
 var app = express();
 
-app.set('secretKey',process.env.SECRET_KEY); // definida en el .env
+console.log(process.env.SECRET_KEY) //Acceso a variable env
+app.set('secretKey',process.env.SECRET_KEY);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -26,9 +27,27 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+/** HEADER INICIO */
+app.use(function(req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin','*');
+  res.setHeader('Access-Control-Allow-Methods','GET,POST,DELETE,PUT');
+  next();
+});
+app.options("/*", function(req, res, next){
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With,x-access-token');
+  res.send(200);
+});
+/** HEADER FIN */
+
+
 app.use('/users', usersRouter);
 app.use('/productos', productsRouter);
 app.use('/categories',validateUser, categoriesRouter);
+
+
+
 
 function validateUser(req,res,next){
   jwt.verify(req.headers['x-access-token'],req.app.get("secretKey"),function(err,decoded){
